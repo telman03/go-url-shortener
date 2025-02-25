@@ -12,6 +12,8 @@ import (
 	"github.com/telman03/go-url-service/utils"
 )
 
+const cacheExpiration = 24 * time.Hour
+
 func ShortenURL(c *fiber.Ctx) error {
 	type Request struct {
 		URL string `json:"url"`
@@ -22,7 +24,6 @@ func ShortenURL(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request"})
 	}
 
-	// Generate a unique short code
 	shortCode := utils.GenerateShortCode(6)
 
 	url := models.URL{
@@ -30,12 +31,12 @@ func ShortenURL(c *fiber.Ctx) error {
 		ShortCode:   shortCode,
 	}
 
-	// Save to DB
+
 	if err := database.DB.Create(&url).Error; err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to save URL"})
 	}
 
-	// Cache in Redis for fast retrieval
+
 	err := cache.RedisClient.Set(context.Background(), shortCode, body.URL, 24*time.Hour).Err()
 	if err != nil {
 		log.Println("⚠️ Failed to cache URL in Redis:", err)
@@ -46,7 +47,6 @@ func ShortenURL(c *fiber.Ctx) error {
 
 
 
-const cacheExpiration = 24 * time.Hour
 func RedirectURL(c *fiber.Ctx) error {
 	shortCode := c.Params("shortcode")
 
@@ -55,17 +55,16 @@ func RedirectURL(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "URL not found"})
 	}
 
-	// Redis Click Tracking
+
 	ctx := context.Background()
 	redisKey := "clicks:" + shortCode
 
-	// Increment Click Count in Redis
 	err := cache.RedisClient.Incr(ctx, redisKey).Err()
 	if err != nil {
 		log.Println("❌ Redis Increment Error:", err)
 	}
 
-	// Retrieve the new click count from Redis
+	
 	clicks, err := cache.RedisClient.Get(ctx, redisKey).Result()
 	if err != nil {
 		log.Println("❌ Redis Get Error:", err)

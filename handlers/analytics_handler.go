@@ -15,7 +15,7 @@ func GetAnalytics(c *fiber.Ctx) error {
 
     clicks, err := cache.RedisClient.Get(ctx, redisKey).Result()
     if err != nil {
-        clicks = "0" // Default to zero if key does not exist
+        clicks = "0" /
     }
 
     return c.JSON(fiber.Map{"shortcode": shortCode, "clicks": clicks})
