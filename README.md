@@ -2,7 +2,7 @@
 
 ## 📌 Overview
 
-This is a high-performance \*\*URL shortener \*\* built with **Golang (Fiber)**, **PostgreSQL**, **Redis**, and **Docker**. It allows users to shorten long URLs, track click analytics, and retrieve stored URLs efficiently.
+This is a high-performance **URL shortener** built with **Golang (Fiber)**, **PostgreSQL**, **Redis**, and **Docker**. It allows users to shorten long URLs, track click analytics, and retrieve stored URLs efficiently.
 
 ## 🚀 Features
 
